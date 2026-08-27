@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# voltride-frontend consumes four backend repos through hand-written
+# contract mirrors in src/api/*.ts. TypeScript cannot verify those mirrors
+# against the producing repos — drift only shows up at runtime, so it is
+# only ever caught by review.
+
+language: "en-US"
+
+tone_instructions: >-
+  Prioritize cross-repo compatibility over style. When a contract mirror in
+  src/api changes or drifts from its producing repository, name the repo and
+  the runtime symptom. Never rate a contract change low risk because the
+  diff is small.
+
+reviews:
+  profile: "assertive"
+  high_level_summary: true
+  request_changes_workflow: true
+
+  path_instructions:
+    - path: "src/api/**"
+      instructions: >-
+        These modules are hand-written mirrors of the backend contracts:
+        catalog.ts mirrors coderabbit-demo/voltride-catalog, cart.ts mirrors
+        coderabbit-demo/voltride-cart (including the 404 cart_not_found body
+        that drives the stale-cart auto-retry), orders.ts mirrors
+        coderabbit-demo/voltride-orders (including the 409/422 error bodies),
+        and notifications.ts mirrors coderabbit-demo/voltride-notifications.
+        Verify any change here matches what the producing repository
+        actually serves, and flag drift in either direction as a CRITICAL
+        cross-repo defect — the compiler cannot catch it, and the symptom is
+        undefined fields or NaN totals at runtime.
+    - path: "**"
+      instructions: >-
+        All service calls must go through the Vite dev proxy
+        (/api/catalog|cart|orders|notifications). Flag any direct call to
+        inventory (4003) or pricing (4005) and any new hardcoded service
+        URL. Money is integer cents formatted via formatCents.
+
+  labeling_instructions:
+    - label: "breaking-change"
+      instructions: >-
+        Apply when the PR changes a src/api contract mirror in a way that no
+        longer matches the producing repository.
+    - label: "cross-repo-impact"
+      instructions: >-
+        Apply when a change here depends on or implies a contract change in
+        a linked backend repository.
+
+  pre_merge_checks:
+    custom_checks:
+      - name: "Cross-repo contract compatibility"
+        mode: "error"
+        instructions: >-
+          FAIL this check if the PR edits any contract mirror in src/api
+          (field names, types, endpoint paths, error-body handling) in a way
+          that does not match what the producing repository
+          (voltride-catalog, voltride-cart, voltride-orders,
+          voltride-notifications) currently serves, unless the PR
+          description links the coordinated producer-side pull request.
+          PASS for purely presentational changes that do not touch the
+          mirrors.
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "AGENTS.md"
+  linked_repositories:
+    - repository: "coderabbit-demo/voltride-catalog"
+      instructions: >-
+        Producer of the product list/detail contracts mirrored in
+        src/api/catalog.ts.
+    - repository: "coderabbit-demo/voltride-cart"
+      instructions: >-
+        Producer of the cart contracts mirrored in src/api/cart.ts,
+        including the 404 cart_not_found body used for stale-cart recovery.
+    - repository: "coderabbit-demo/voltride-orders"
+      instructions: >-
+        Producer of the order contract and 409/422 error bodies mirrored in
+        src/api/orders.ts.
+    - repository: "coderabbit-demo/voltride-notifications"
+      instructions: >-
+        Producer of the notification records mirrored in
+        src/api/notifications.ts.

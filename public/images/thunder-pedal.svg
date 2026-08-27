@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" fill="url(#bg)"/>
+  <g stroke="#ffffff" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.95">
+    <circle cx="120" cy="165" r="42"/>
+    <circle cx="290" cy="165" r="42"/>
+    <path d="M120 165 L175 95 L255 95 L290 165 L195 165 Z"/>
+    <path d="M175 95 L195 165"/>
+    <path d="M255 95 L245 75 L265 75"/>
+    <path d="M175 95 L160 75 L145 78"/>
+  </g>
+  <rect x="185" y="112" width="52" height="14" rx="7" fill="#ffffff" opacity="0.9"/>
+  <text x="200" y="215" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="bold" fill="#ffffff" text-anchor="middle">Thunder Pedal Pro ⚡</text>
+</svg>
